@@ -1,0 +1,1485 @@
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <title>IT Envanter Takip Sistemi</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="style.css?v=17" />
+    <script src="https://www.gstatic.com/firebasejs/12.2.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.2.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore-compat.js"></script>
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+    <script src="js/genel.js" defer></script>
+    <script src="js/firebase.js" defer></script>
+    <script src="js/yardimcilar.js" defer></script>
+    <script src="js/tema_ui.js" defer></script>
+    <script src="js/dashboard.js" defer></script>
+    <script src="js/cihazlar.js" defer></script>
+    <script src="js/envanter.js" defer></script>
+    <script src="js/kullanicilar.js" defer></script>
+    <script src="js/zimmetler.js" defer></script>
+    <script src="js/talepler.js" defer></script>
+    <link rel="icon" href="data:,">
+  </head>
+  <body>
+    <div id="girisEkrani" class="giris-ekrani">
+      <div class="giris-kutu">
+        <h1>IT Envanter Takip</h1>
+        <p>Sisteme giriş yapın</p>
+        <label>Kullanıcı Adı</label>
+        <input
+          type="text"
+          id="girisKullaniciAdi"
+          placeholder="Kullanıcı adınızı giriniz"
+        />
+        <label>Şifre</label>
+        <input type="password" id="girisSifre" placeholder="Şifre" />
+        <button onclick="girisYap()">Giriş Yap</button>
+        <button
+          class="sifremi-unuttum"
+          type="button"
+          onclick="sifremiUnuttumGoster()"
+        >
+          Şifremi Unuttum?
+        </button>
+      </div>
+    </div>
+
+    <div id="sifremiUnuttumEkrani" class="giris-ekrani" style="display: none">
+      <div class="giris-kutu bilgi-kutusu">
+        <h1>Şifrenizi mi unuttunuz?</h1>
+        <p>
+          Bu sistemde kullanıcı hesapları ve şifreler sistem yöneticisi
+          tarafından yönetilmektedir.
+        </p>
+        <p>
+          Şifre sıfırlama talebi için IT Departmanı veya Sistem Yöneticisi ile
+          iletişime geçiniz.
+        </p>
+        <label>Kullanıcı Adı</label>
+        <input
+          type="text"
+          id="sifreTalepKullaniciAdi"
+          placeholder="Kullanıcı adınız"
+        />
+        <button type="button" onclick="sifreSifirlamaTalebiOlustur()">
+          Şifre Sıfırlama Talebi Oluştur
+        </button>
+        <button type="button" onclick="girisSayfasinaDon()">
+          Giriş Sayfasına Dön
+        </button>
+      </div>
+    </div>
+
+    <div id="uygulamaAlani" class="uygulama">
+      <div class="ustMenu">
+        <button
+          class="sidebar-toggle"
+          type="button"
+          onclick="sidebarToggle()"
+          aria-label="Menüyü aç veya kapat"
+          title="Menüyü aç veya kapat"
+        >
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+        <div class="logo">IT ENVANTER TAKİP SİSTEMİ</div>
+        <div class="bildirim-menu">
+          <button
+            id="bildirimButonu"
+            class="bildirim-butonu"
+            type="button"
+            onclick="bildirimMenusuAc()"
+            aria-label="Bildirimleri aç"
+            title="Bildirimler"
+          >
+            <span aria-hidden="true">🔔</span>
+            <span id="bildirimRozeti" class="bildirim-rozeti">0</span>
+          </button>
+          <div id="bildirimDropdown" class="bildirim-dropdown">
+            <div class="bildirim-baslik">
+              <strong>Bildirimler</strong>
+              <span id="bildirimSayisi">0 bekleyen</span>
+            </div>
+            <div id="bildirimListesi" class="bildirim-listesi"></div>
+          </div>
+        </div>
+        <div class="menu">
+          <div class="sidebar-brand">
+            <strong>IT ENVANTER TAKİP</strong>
+            <span>YÖNETİM PANELİ</span>
+          </div>
+          <div class="sidebar-section">ÇALIŞMA ALANI</div>
+          <button id="dashboardMenuBtn" onclick="dashboardGoster()">
+            <span class="nav-icon">▦</span>
+            Genel Bakış
+          </button>
+          <button id="envanterMenuBtn" onclick="envanterGoster()">
+            <span class="nav-icon">◈</span>
+            Envanter
+          </button>
+          <button id="cihazlarMenuBtn" onclick="cihazlarSayfasiniGoster()">
+            <span class="nav-icon">▣</span>
+            Varlıklar ve cihazlar
+          </button>
+          <button id="kullanicilarMenuBtn" onclick="kullanicilariGoster()">
+            <span class="nav-icon">♧</span>
+            Kullanıcılar ve zimmet
+          </button>
+          <div class="sidebar-section sidebar-section-yonetim">YÖNETİM</div>
+          <button id="taleplerMenuBtn" onclick="talepleriGoster()">
+            <span class="nav-icon">◷</span>
+            Talepler
+            <span id="taleplerRozeti" class="talepler-rozeti" hidden>0</span>
+          </button>
+
+          <div class="yeni-olustur">
+            <div class="sidebar-section">İŞLEMLER</div>
+            <button class="yeni-olustur-btn" onclick="yeniOlusturMenu()">
+              + Yeni Oluştur <span>▼</span>
+            </button>
+            <div class="yeni-menu" id="yeniMenu">
+              <button onclick="yeniCihazEkle()">🖥️ Yeni Varlık</button>
+              <button onclick="yeniKullaniciEkle()">👤 Yeni Kullanıcı</button>
+              <button onclick="yeniZimmetEkle()">📋 Yeni Zimmet</button>
+              <button onclick="dahiliTalepFormunuAc()">📝 Yeni Talep</button>
+            </div>
+          </div>
+
+          <div class="sidebar-durum">
+            <i aria-hidden="true"></i>
+            <span>Tüm sistemler çalışıyor</span>
+          </div>
+
+          <div class="yonetici-menu">
+            <button id="yoneticiMenuBtn" onclick="yoneticiMenuAc()">
+              <span class="yonetici-avatar" aria-hidden="true">A</span>
+              <span class="yonetici-bilgi">
+                <span id="aktifKullaniciAdi">Kullanıcı</span>
+                <small id="aktifKullaniciRolu">Kullanıcı</small>
+              </span>
+              <span class="yonetici-ok" aria-hidden="true">▼</span>
+            </button>
+            <div class="yonetici-dropdown" id="yoneticiDropdown">
+              <button onclick="profilGoster()">👤 Profili Düzenle</button>
+              <button id="temaButonu" onclick="temaDegistir()">
+                🌙 Dark Mode
+              </button>
+              <button onclick="cikisYap()">🚪 Çıkış</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div id="dashboardAlani" class="sayfaAlani" style="display: none">
+        <div class="dashboard-baslik-alani">
+          <div>
+            <h2 id="dashboardTarih" class="dashboard-tarih"></h2>
+            <h1>Genel Bakış</h1>
+            <p>Operasyonlarınızın güncel durumu ve dikkat gerektiren işler.</p>
+          </div>
+          <div class="dashboard-baslik-aksiyonlari">
+            <button class="btn-ikincil" onclick="dashboardRaporYazdir()">
+              PDF İndir
+            </button>
+            <button class="btn-birincil" onclick="yeniCihazEkle()">
+              + Yeni Varlık
+            </button>
+          </div>
+        </div>
+
+        <div class="dash-grid">
+          <!-- ÜST KARTLAR (6 Adet) -->
+          <div class="dash-card stat-card">
+            <div class="stat-icon b-mavi">📦</div>
+            <div class="stat-info">
+              <span>Toplam Varlık</span><strong id="toplamCihaz">0</strong>
+            </div>
+          </div>
+          <div class="dash-card stat-card">
+            <div class="stat-icon b-yesil">✔️</div>
+            <div class="stat-info">
+              <span>Müsait Varlık</span><strong id="musaitVarlik">0</strong>
+            </div>
+          </div>
+          <div class="dash-card stat-card">
+            <div class="stat-icon b-turkuaz">👤</div>
+            <div class="stat-info">
+              <span>Zimmetli Varlık</span><strong id="zimmetliVarlik">0</strong>
+            </div>
+          </div>
+          <div class="dash-card stat-card">
+            <div class="stat-icon b-turuncu">🔧</div>
+            <div class="stat-info">
+              <span>Bakımda Varlık</span><strong id="bakimdakiVarlik">0</strong>
+            </div>
+          </div>
+          <div class="dash-card stat-card">
+            <div class="stat-icon b-mor">👥</div>
+            <div class="stat-info">
+              <span>Toplam Kullanıcı</span
+              ><strong id="toplamKullanici">0</strong>
+            </div>
+          </div>
+          <div class="dash-card stat-card">
+            <div class="stat-icon b-kirmizi">📋</div>
+            <div class="stat-info">
+              <span>Açık Talepler</span><strong id="acikTalepSayisi">0</strong>
+            </div>
+          </div>
+
+          <!-- ORTA GRAFİKLER -->
+          <div class="dash-card span-3">
+            <h3>Varlık Türü Dağılımı</h3>
+            <div id="kategoriGrafik" class="donut-grafik-kapsayici"></div>
+          </div>
+          <div class="dash-card span-5">
+            <h3>Lokasyon Dağılımı</h3>
+            <div id="lokasyonGrafik" class="bar-grafik-kapsayici"></div>
+          </div>
+          <div class="dash-card span-4">
+            <h3>Son 7 Günlük Hareketler</h3>
+            <div id="yediGunGrafik" class="line-grafik-kapsayici"></div>
+          </div>
+
+          <!-- ALT BİLGİ PANELLERİ -->
+          <div class="dash-card span-3 panel-gorsel-uyumlu">
+            <h3>En Çok Zimmet Alan Kullanıcılar</h3>
+            <div id="kullaniciZimmetGrafik" class="liste-grafik-kapsayici"></div>
+          </div>
+          <div class="dash-card span-3 panel-gorsel-uyumlu">
+            <h3>Bakımdaki Cihazlar</h3>
+            <table class="mini-tablo gorsel-tablo" id="miniBakimTablosu"></table>
+          </div>
+          <div class="dash-card span-3 panel-gorsel-uyumlu">
+            <h3>Arızalı Cihazlar</h3>
+            <table class="mini-tablo gorsel-tablo" id="miniArizaTablosu"></table>
+          </div>
+          <div class="dash-card span-3 panel-gorsel-uyumlu">
+            <h3>Talep Durumları</h3>
+            <div id="talepDurumGrafik" class="donut-grafik-kapsayici"></div>
+          </div>
+
+          <!-- EN ALT (SON HAREKETLER & AKTİVİTE AKIŞI) -->
+          <div class="dash-card span-8">
+            <div class="card-header card-header-yeni">
+              <div>
+                <h3>Son hareketler</h3>
+                <p>En son güncellenen envanter kayıtları</p>
+              </div>
+              <button
+                type="button"
+                class="tum-varliklar-link"
+                onclick="cihazlarSayfasiniGoster()"
+              >
+                Tüm varlıklar ↗
+              </button>
+            </div>
+            <div
+              class="son-hareketler-tablosu"
+              aria-label="Son hareketler tablosu"
+            >
+              <table class="son-hareketler-yeni-tablo">
+                <thead>
+                  <tr>
+                    <th>VARLIK / CİHAZ</th>
+                    <th>SERİ NO</th>
+                    <th>KULLANICI</th>
+                    <th>LOKASYON</th>
+                    <th>TARİH</th>
+                    <th>DURUM</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody id="sonZimmetListesi"></tbody>
+              </table>
+            </div>
+          </div>
+          <div class="dash-card span-4">
+            <div class="card-header card-header-yeni">
+              <div>
+                <h3>Aktivite akışı</h3>
+                <p>Ekibinizin son işlemleri</p>
+              </div>
+              <button class="islem-dots-btn" type="button" aria-label="Menü">
+                ⋮
+              </button>
+            </div>
+            <div id="aktiviteListesi" class="aktivite-listesi-kapsayici"></div>
+          </div>
+        </div>
+      </div>
+
+      <div id="envanterAlani" class="sayfaAlani" hidden>
+        <div class="sayfaBaslik">
+          <div>
+            <h1>Envanter</h1>
+            <p>Varlık, kullanıcı ve zimmet bilgilerinin birleşik görünümü</p>
+          </div>
+          <div class="sayfaBaslikButonlari">
+            <button onclick="yeniZimmetEkle()">+ Yeni Zimmet</button>
+          </div>
+        </div>
+
+        <div class="islemAlani">
+          <input
+            type="text"
+            id="envanterArama"
+            placeholder="Envanterde ara..."
+            onkeyup="envanterAra()"
+          />
+          <select
+            id="envanterDurumFiltre"
+            onchange="envanterFiltreDegisti()"
+            aria-label="Duruma göre filtrele"
+          >
+            <option value="">Tüm Durumlar</option>
+            <option value="musait">Müsait</option>
+            <option value="zimmetli">Zimmetli</option>
+            <option value="bakimda">Bakımda</option>
+            <option value="arizali">Arızalı</option>
+            <option value="hurda">Hurda</option>
+          </select>
+          <button onclick="excelEnvanterAktar()">Excel'e Aktar</button>
+          <button onclick="envanterYazdir()">Yazdır</button>
+        </div>
+
+        <div class="tabloAlani">
+          <table class="envanter-tablosu">
+            <thead>
+              <tr>
+                <th>Kategori</th>
+                <th>Marka</th>
+                <th>Model</th>
+                <th>Seri</th>
+                <th>Durum</th>
+                <th>Kullanıcı</th>
+                <th>Zimmet Tarihi</th>
+                <th>Lokasyon</th>
+                <th>İşlemler</th>
+              </tr>
+            </thead>
+            <tbody id="envanterListesi"></tbody>
+          </table>
+        </div>
+
+        <div id="envanterSayfalama" class="sayfalama"></div>
+      </div>
+
+      <div id="taleplerAlani" class="sayfaAlani" hidden>
+        <div class="sayfaBaslik">
+          <div>
+            <h1>Talepler</h1>
+            <p>Destek ve şifre sıfırlama taleplerini yönetin.</p>
+          </div>
+
+          <button
+            id="talepOlusturBtn"
+            type="button"
+            onclick="dahiliTalepFormunuAc()"
+          >
+            + Talep Oluştur
+          </button>
+        </div>
+
+        <!-- Talep Özetleri -->
+        <div class="kutular talep-ozetleri">
+          <div class="kutu ozet-kart">
+            <span>Yeni</span>
+            <div class="sayi" id="bekleyenTalepSayisi">0</div>
+          </div>
+
+          <div class="kutu ozet-kart">
+            <span>İşlemde</span>
+            <div class="sayi" id="islemdekiTalepSayisi">0</div>
+          </div>
+
+          <div class="kutu ozet-kart">
+            <span>Tamamlanan</span>
+            <div class="sayi" id="tamamlananTalepSayisi">0</div>
+          </div>
+        </div>
+
+        <!-- Arama ve Filtreleme -->
+        <div class="islemAlani">
+          <input
+            type="text"
+            id="talepArama"
+            placeholder="Talep ara..."
+            oninput="talepleriFiltrele()"
+          />
+
+          <select id="talepDurumFiltre" onchange="talepleriFiltrele()">
+            <option value="">Tüm Durumlar</option>
+            <option value="Açık">Açık</option>
+            <option value="İşlemde">İşlemde</option>
+            <option value="Tamamlandı">Tamamlandı</option>
+          </select>
+        </div>
+
+        <!-- Talepler Tablosu -->
+        <div class="tabloAlani">
+          <table class="talep-tablosu">
+            <thead>
+              <tr>
+                <th>Talep No</th>
+                <th>Tarih</th>
+                <th>Talep Eden</th>
+                <th>Varlık</th>
+                <th>Konu</th>
+                <th>Açıklama</th>
+                <th>Durum</th>
+                <th>İşlemler</th>
+              </tr>
+            </thead>
+
+            <tbody id="talepListesi"></tbody>
+          </table>
+        </div>
+
+        <!-- Şifre Sıfırlama Talepleri -->
+        <div class="sifre-talepleri">
+          <div class="kartBaslik">
+            <div>
+              <h2>Şifre Sıfırlama Talepleri</h2>
+              <p>Kullanıcılardan gelen şifre sıfırlama talepleri.</p>
+            </div>
+          </div>
+
+          <div id="sifreTalepListesi" class="talep-listesi"></div>
+        </div>
+      </div>
+
+      <div id="cihazlarAlani" class="sayfaAlani">
+        <div class="sayfaBaslik">
+          <div>
+            <h1>Varlıklar</h1>
+            <p>Sistemde kayıtlı varlıkları yönetin.</p>
+          </div>
+          <button onclick="yeniCihazEkle()">+ Yeni Varlık</button>
+        </div>
+
+        <div class="butonlar">
+          <input
+            type="text"
+            id="cihazArama"
+            placeholder="Varlık ara..."
+            onkeyup="cihazAra()"
+          />
+          <select
+            id="cihazDurumFiltre"
+            onchange="cihazFiltreDegisti()"
+            aria-label="Duruma göre filtrele"
+          >
+            <option value="">Tüm Durumlar</option>
+            <option value="musait">Müsait</option>
+            <option value="zimmetli">Zimmetli</option>
+            <option value="bakimda">Bakımda</option>
+            <option value="arizali">Arızalı</option>
+            <option value="hurda">Hurda</option>
+          </select>
+          <button onclick="excelCihazAktar()">Excel'e Aktar</button>
+          <button onclick="cihazYazdir()">Yazdır</button>
+        </div>
+
+        <div class="tabloAlani">
+          <table class="varlik-tablosu">
+            <thead>
+              <tr>
+                <th>Kategori</th>
+                <th>Marka</th>
+                <th>Model</th>
+                <th>Seri No</th>
+                <th>Durum</th>
+                <th>Lokasyon</th>
+                <th>İşlemler</th>
+              </tr>
+            </thead>
+            <tbody id="cihazListesi"></tbody>
+          </table>
+        </div>
+
+        <div id="cihazSayfalama" class="sayfalama"></div>
+      </div>
+
+      <div id="kullanicilarAlani" class="sayfaAlani">
+        <div class="sayfaBaslik">
+          <div>
+            <h1>Kullanıcılar</h1>
+            <p>Sistemde kayıtlı kullanıcıları yönetin.</p>
+          </div>
+          <button onclick="yeniKullaniciEkle()">+ Yeni Kullanıcı</button>
+        </div>
+
+        <div class="islemAlani">
+          <input
+            type="text"
+            id="kullaniciArama"
+            placeholder="Kullanıcı ara..."
+            onkeyup="kullaniciAra()"
+          />
+          <select
+            id="kullaniciYetkiFiltre"
+            onchange="kullaniciFiltreDegisti()"
+            aria-label="Yetkiye göre filtrele"
+          >
+            <option value="">Tüm Yetkiler</option>
+            <option value="yonetici">Yönetici</option>
+            <option value="kullanici">Kullanıcı</option>
+          </select>
+          <button onclick="kullaniciDuzenle()">Düzenle</button>
+          <button onclick="kullaniciSil()">Sil</button>
+          <button onclick="excelKullaniciAktar()">Excel'e Aktar</button>
+          <button onclick="kullaniciYazdir()">Yazdır</button>
+        </div>
+
+        <div class="tabloAlani">
+          <table class="kullanici-tablosu">
+            <thead>
+              <tr>
+                <th>Seç</th>
+                <th>Ad Soyad</th>
+                <th>Kullanıcı Adı</th>
+                <th>Şube</th>
+                <th>E-posta</th>
+                <th>Zimmet</th>
+                <th>Yetki</th>
+              </tr>
+            </thead>
+            <tbody id="kullaniciListesi"></tbody>
+          </table>
+        </div>
+
+        <div id="kullaniciSayfalama" class="sayfalama"></div>
+      </div>
+
+      <div id="cihazFormu" class="form-overlay">
+        <div class="formKutusu cihaz-form-kutu">
+          <div class="form-baslik">
+            <h2 id="cihazFormBaslik">Yeni Varlık</h2>
+            <button onclick="formuKapat()">×</button>
+          </div>
+
+          <div class="cihaz-form-icerik">
+            <!-- 1. TEMEL BİLGİLER (Varsayılan Açık) -->
+            <div class="form-bolum accordion-bolum acik" id="bolumTemel">
+              <div
+                class="form-bolum-baslik accordion-baslik"
+                onclick="accordionToggle('bolumTemel')"
+              >
+                <span>Temel Bilgiler</span>
+                <span class="accordion-ok">▼</span>
+              </div>
+              <div class="form-bolum-icerik">
+                <div class="form-grid-2">
+                  <div class="form-grup">
+                    <label>Kategori</label>
+                    <select id="kategori" onchange="kategoriDegisti()">
+                      <option value="bilgisayar">Bilgisayar</option>
+                      <option value="telefon">Telefon</option>
+                      <option value="tablet">Tablet</option>
+                      <option value="yazici">Yazıcı</option>
+                      <option value="monitor">Monitör</option>
+                      <option value="diger">Diğer</option>
+                    </select>
+                  </div>
+                  <div class="form-grup">
+                    <label>Marka</label>
+                    <select id="marka" onchange="markaDegisti()">
+                      <option value="">Marka seçiniz</option>
+                    </select>
+                  </div>
+                  <div class="form-grup">
+                    <label>Model</label>
+                    <select id="model">
+                      <option value="">Önce marka seçiniz</option>
+                    </select>
+                  </div>
+                  <div class="form-grup">
+                    <label>Seri Numarası <span class="zorunlu">*</span></label>
+                    <input
+                      type="text"
+                      id="seri"
+                      placeholder="Seri numarası (zorunlu)"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 2. TEKNİK BİLGİLER (Varsayılan Kapalı) -->
+            <div class="form-bolum accordion-bolum" id="teknikBilgiler">
+              <div
+                class="form-bolum-baslik accordion-baslik"
+                onclick="accordionToggle('teknikBilgiler')"
+              >
+                <span>Teknik Bilgiler</span>
+                <span class="accordion-ok">▼</span>
+              </div>
+              <div class="form-bolum-icerik">
+                <div class="form-grid-2">
+                  <div class="form-grup" id="islemciGrup">
+                    <label>İşlemci</label>
+                    <select id="islemci">
+                      <option value="">İşlemci seçiniz</option>
+                      <option value="Intel Core i3">Intel Core i3</option>
+                      <option value="Intel Core i5">Intel Core i5</option>
+                      <option value="Intel Core i7">Intel Core i7</option>
+                      <option value="Intel Core i9">Intel Core i9</option>
+                      <option value="Intel Xeon">Intel Xeon</option>
+                      <option value="AMD Ryzen 3">AMD Ryzen 3</option>
+                      <option value="AMD Ryzen 5">AMD Ryzen 5</option>
+                      <option value="AMD Ryzen 7">AMD Ryzen 7</option>
+                      <option value="AMD Ryzen 9">AMD Ryzen 9</option>
+                      <option value="Apple M1">Apple M1</option>
+                      <option value="Apple M2">Apple M2</option>
+                      <option value="Apple M3">Apple M3</option>
+                      <option value="Apple M4">Apple M4</option>
+                      <option value="__diger__">Diğer (elle gir)</option>
+                    </select>
+                  </div>
+                  <div class="form-grup" id="ramGrup">
+                    <label>RAM</label>
+                    <select id="ram">
+                      <option value="">RAM seçiniz</option>
+                      <option value="4 GB">4 GB</option>
+                      <option value="8 GB">8 GB</option>
+                      <option value="16 GB">16 GB</option>
+                      <option value="32 GB">32 GB</option>
+                      <option value="64 GB">64 GB</option>
+                      <option value="128 GB">128 GB</option>
+                      <option value="__diger__">Diğer (elle gir)</option>
+                    </select>
+                  </div>
+                  <div class="form-grup" id="depolamaGrup">
+                    <label>Depolama</label>
+                    <select id="depolama">
+                      <option value="">Depolama seçiniz</option>
+                      <option value="128 GB SSD">128 GB SSD</option>
+                      <option value="256 GB SSD">256 GB SSD</option>
+                      <option value="512 GB SSD">512 GB SSD</option>
+                      <option value="1 TB SSD">1 TB SSD</option>
+                      <option value="2 TB SSD">2 TB SSD</option>
+                      <option value="500 GB HDD">500 GB HDD</option>
+                      <option value="1 TB HDD">1 TB HDD</option>
+                      <option value="__diger__">Diğer (elle gir)</option>
+                    </select>
+                  </div>
+                  <div class="form-grup" id="macGrup">
+                    <label>MAC Adresi <span class="zorunlu">*</span></label>
+                    <input
+                      type="text"
+                      id="mac"
+                      placeholder="AA:BB:CC:DD:EE:FF"
+                      maxlength="17"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 3. DİĞER BİLGİLER (Varsayılan Kapalı) -->
+            <div class="form-bolum accordion-bolum" id="bolumDiger">
+              <div
+                class="form-bolum-baslik accordion-baslik"
+                onclick="accordionToggle('bolumDiger')"
+              >
+                <span>Diğer Bilgiler</span>
+                <span class="accordion-ok">▼</span>
+              </div>
+              <div class="form-bolum-icerik">
+                <div class="form-grid-2">
+                  <div class="form-grup">
+                    <label>Durum</label>
+                    <select id="durum" onchange="durumDegisti()">
+                      <option value="musait">Müsait</option>
+                      <option value="zimmetli">Zimmetli</option>
+                      <option value="bakimda">Bakımda</option>
+                      <option value="arizali">Arızalı</option>
+                      <option value="hurda">Hurda</option>
+                    </select>
+                  </div>
+                  <div class="form-grup">
+                    <label>Lokasyon</label>
+                    <input
+                      type="text"
+                      id="cihazLokasyon"
+                      placeholder="Örn: İstanbul / Seyrantepe"
+                    />
+                  </div>
+                </div>
+
+                <!-- ZİMMETLİ ALANLARI -->
+                <div
+                  id="durumPanel_zimmetli"
+                  class="durum-paneli"
+                  style="display: none"
+                >
+                  <div class="durum-alt-baslik">Zimmet Bilgileri</div>
+                  <div class="form-grid-2">
+                    <div class="form-grup" style="grid-column: 1 / -1">
+                      <label>Kullanıcı</label>
+                      <select id="durumZimmetKullanici">
+                        <option value="">Kullanıcı seçiniz</option>
+                      </select>
+                    </div>
+                    <div class="form-grup">
+                      <label>Zimmet Tarihi</label>
+                      <input type="date" id="durumZimmetTarih" />
+                    </div>
+                    <div class="form-grup">
+                      <label>Teslim Tarihi</label>
+                      <input type="date" id="durumZimmetTeslimTarih" />
+                    </div>
+                  </div>
+                </div>
+
+                <!-- BAKIMDA ALANLARI -->
+                <div
+                  id="durumPanel_bakimda"
+                  class="durum-paneli"
+                  style="display: none"
+                >
+                  <div class="durum-alt-baslik">Bakım Bilgileri</div>
+                  <div class="form-grid-2">
+                    <div class="form-grup">
+                      <label>Bakım Nedeni</label>
+                      <select
+                        id="durumBakimNedeni"
+                        onchange="
+                          manuelGirisKontrol(
+                            'durumBakimNedeni',
+                            'durumBakimNedeniManuel',
+                          )
+                        "
+                      >
+                        <option value="">Bakım nedeni seçiniz</option>
+                        <option value="Periyodik bakım">Periyodik bakım</option>
+                        <option value="Donanım arızası">Donanım arızası</option>
+                        <option value="Yazılım problemi">
+                          Yazılım problemi
+                        </option>
+                        <option value="Temizlik">Temizlik</option>
+                        <option value="Parça değişimi">Parça değişimi</option>
+                        <option value="Performans problemi">
+                          Performans problemi
+                        </option>
+                        <option value="diger_manuel">Diğer / Manuel</option>
+                      </select>
+                      <input
+                        type="text"
+                        id="durumBakimNedeniManuel"
+                        class="manuel-input"
+                        placeholder="Bakım nedenini yazınız..."
+                        style="display: none; margin-top: 6px"
+                      />
+                    </div>
+                    <div class="form-grup">
+                      <label>Servis</label>
+                      <select
+                        id="durumBakimServis"
+                        onchange="
+                          manuelGirisKontrol(
+                            'durumBakimServis',
+                            'durumBakimServisManuel',
+                          )
+                        "
+                      >
+                        <option value="">Servis seçiniz</option>
+                        <option value="Yetkili Servis">Yetkili Servis</option>
+                        <option value="Üretici Servisi">Üretici Servisi</option>
+                        <option value="Teknik Servis">Teknik Servis</option>
+                        <option value="Şirket İçi IT">Şirket İçi IT</option>
+                        <option value="diger_manuel">Diğer / Manuel</option>
+                      </select>
+                      <input
+                        type="text"
+                        id="durumBakimServisManuel"
+                        class="manuel-input"
+                        placeholder="Servis adını yazınız..."
+                        style="display: none; margin-top: 6px"
+                      />
+                    </div>
+                    <div class="form-grup">
+                      <label>Başlangıç Tarihi</label>
+                      <input type="date" id="durumBakimBaslangic" />
+                    </div>
+                    <div class="form-grup">
+                      <label>Tahmini Bitiş Tarihi</label>
+                      <input type="date" id="durumBakimBitis" />
+                    </div>
+                    <div class="form-grup">
+                      <label>Maliyet (₺)</label>
+                      <input
+                        type="number"
+                        id="durumBakimMaliyet"
+                        placeholder="0.00"
+                        step="0.01"
+                        min="0"
+                      />
+                    </div>
+                    <div class="form-grup" style="grid-column: 1 / -1">
+                      <label>Açıklama</label>
+                      <textarea
+                        id="durumBakimAciklama"
+                        rows="2"
+                        placeholder="Bakım ile ilgili açıklama..."
+                      ></textarea>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- ARIZALI ALANLARI -->
+                <div
+                  id="durumPanel_arizali"
+                  class="durum-paneli"
+                  style="display: none"
+                >
+                  <div class="durum-alt-baslik">Arıza Bilgileri</div>
+                  <div class="form-grid-2">
+                    <div class="form-grup">
+                      <label>Arıza Türü</label>
+                      <select
+                        id="durumArizaTuru"
+                        onchange="
+                          manuelGirisKontrol(
+                            'durumArizaTuru',
+                            'durumArizaTuruManuel',
+                          )
+                        "
+                      >
+                        <option value="">Arıza türü seçiniz</option>
+                        <option value="Ekran">Ekran</option>
+                        <option value="Batarya">Batarya</option>
+                        <option value="Klavye">Klavye</option>
+                        <option value="Mouse/Touchpad">Mouse/Touchpad</option>
+                        <option value="Şarj">Şarj</option>
+                        <option value="Ağ/İnternet">Ağ/İnternet</option>
+                        <option value="Yazılım">Yazılım</option>
+                        <option value="Donanım">Donanım</option>
+                        <option value="diger_manuel">Diğer / Manuel</option>
+                      </select>
+                      <input
+                        type="text"
+                        id="durumArizaTuruManuel"
+                        class="manuel-input"
+                        placeholder="Arıza türünü yazınız..."
+                        style="display: none; margin-top: 6px"
+                      />
+                    </div>
+                    <div class="form-grup">
+                      <label>Arıza Tarihi</label>
+                      <input type="date" id="durumArizaTarih" />
+                    </div>
+                    <div class="form-grup">
+                      <label>Servis</label>
+                      <select
+                        id="durumArizaServis"
+                        onchange="
+                          manuelGirisKontrol(
+                            'durumArizaServis',
+                            'durumArizaServisManuel',
+                          )
+                        "
+                      >
+                        <option value="">Servis seçiniz</option>
+                        <option value="Yetkili Servis">Yetkili Servis</option>
+                        <option value="Üretici Servisi">Üretici Servisi</option>
+                        <option value="Teknik Servis">Teknik Servis</option>
+                        <option value="Şirket İçi IT">Şirket İçi IT</option>
+                        <option value="diger_manuel">Diğer / Manuel</option>
+                      </select>
+                      <input
+                        type="text"
+                        id="durumArizaServisManuel"
+                        class="manuel-input"
+                        placeholder="Servis adını yazınız..."
+                        style="display: none; margin-top: 6px"
+                      />
+                    </div>
+                    <div class="form-grup" style="grid-column: 1 / -1">
+                      <label>Açıklama</label>
+                      <textarea
+                        id="durumArizaAciklama"
+                        rows="2"
+                        placeholder="Arıza ile ilgili açıklama..."
+                      ></textarea>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- HURDA ALANLARI -->
+                <div
+                  id="durumPanel_hurda"
+                  class="durum-paneli"
+                  style="display: none"
+                >
+                  <div class="durum-alt-baslik">Hurda Bilgileri</div>
+                  <div class="form-grid-2">
+                    <div class="form-grup">
+                      <label>Hurdaya Ayrılma Tarihi</label>
+                      <input type="date" id="durumHurdaTarih" />
+                    </div>
+                    <div class="form-grup">
+                      <label>Hurda Nedeni</label>
+                      <select
+                        id="durumHurdaNedeni"
+                        onchange="
+                          manuelGirisKontrol(
+                            'durumHurdaNedeni',
+                            'durumHurdaNedeniManuel',
+                          )
+                        "
+                      >
+                        <option value="">Hurda nedeni seçiniz</option>
+                        <option value="Ekonomik ömrünü tamamladı">
+                          Ekonomik ömrünü tamamladı
+                        </option>
+                        <option value="Onarılamıyor">Onarılamıyor</option>
+                        <option value="Parça bulunamıyor">
+                          Parça bulunamıyor
+                        </option>
+                        <option value="Kullanım dışı">Kullanım dışı</option>
+                        <option value="diger_manuel">Diğer / Manuel</option>
+                      </select>
+                      <input
+                        type="text"
+                        id="durumHurdaNedeniManuel"
+                        class="manuel-input"
+                        placeholder="Hurda nedenini yazınız..."
+                        style="display: none; margin-top: 6px"
+                      />
+                    </div>
+                    <div class="form-grup" style="grid-column: 1 / -1">
+                      <label>Açıklama</label>
+                      <textarea
+                        id="durumHurdaAciklama"
+                        rows="2"
+                        placeholder="Hurda açıklaması..."
+                      ></textarea>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="formButonlari">
+            <button onclick="cihazEkle()">Kaydet</button>
+            <button class="iptal" onclick="formuKapat()">İptal</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="kullaniciFormu" class="form-overlay">
+        <div class="form-kutu kullanici-kutu">
+          <div class="form-baslik">
+            <h2 id="kullaniciFormBaslik">Yeni Kullanıcı</h2>
+            <button onclick="kullaniciFormunuKapat()">×</button>
+          </div>
+
+          <div class="form-grid">
+            <div class="form-grup">
+              <label>Ad</label>
+              <input type="text" id="kullaniciAd" placeholder="Ad" />
+            </div>
+
+            <div class="form-grup">
+              <label>Soyad</label>
+              <input type="text" id="kullaniciSoyad" placeholder="Soyad" />
+            </div>
+
+            <div class="form-grup">
+              <label>Kullanıcı Adı</label>
+              <input
+                type="text"
+                id="kullaniciAdi"
+                placeholder="Kullanıcı adı"
+              />
+            </div>
+
+            <div class="form-grup">
+              <label>Şube</label>
+              <select id="kullaniciSube">
+                <option value="">Şube seçiniz</option>
+                <option value="Seyrantepe">Seyrantepe</option>
+                <option value="Gaziosmanpaşa">Gaziosmanpaşa</option>
+                <option value="Şişli">Şişli</option>
+              </select>
+            </div>
+
+            <div class="form-grup">
+              <label>E-posta</label>
+              <input
+                type="email"
+                id="kullaniciEmail"
+                placeholder="ornek@firma.com"
+              />
+            </div>
+
+            <div class="form-grup" id="kullaniciSifreGrup">
+              <label>Şifre</label>
+              <input
+                type="password"
+                id="kullaniciSifre"
+                placeholder="Şifre"
+                oninput="
+                  sifreGucuGuncelle(
+                    'kullaniciSifre',
+                    'kullaniciSifreGostergesi',
+                  )
+                "
+              />
+              <div
+                id="kullaniciSifreGostergesi"
+                class="sifre-gucu-gostergesi"
+              ></div>
+            </div>
+
+            <div class="form-grup" id="kullaniciSifreTekrarGrup">
+              <label>Şifre Tekrar</label>
+              <input
+                type="password"
+                id="kullaniciSifreTekrar"
+                placeholder="Şifre tekrar"
+              />
+            </div>
+          </div>
+
+          <label class="ilk-giris-yetki-secimi">
+            <input
+              type="checkbox"
+              id="ilkGirisYetkiVer"
+              onchange="kullaniciIzinleriniAc()"
+            />
+            <span>Giriş yetkisi ver</span>
+          </label>
+          <p class="giris-yetki-aciklama">
+            İşaretlediğinizde kullanıcının <strong>şifresi</strong> ve
+            <strong>yetkileri</strong> belirlenir; kullanıcı sisteme giriş
+            yapabilir.
+          </p>
+
+          <div id="kullaniciIzinleri" class="izinler">
+            <div class="izin-baslik">
+              <div>
+                <h3>İzinler</h3>
+                <p>Kullanıcının sistem üzerindeki yetkilerini belirleyin.</p>
+              </div>
+
+              <label class="yonetici-checkbox">
+                <input
+                  type="checkbox"
+                  id="yoneticiErisimi"
+                  onchange="yoneticiYetkisi()"
+                />
+                <span>Yönetici erişimi</span>
+              </label>
+            </div>
+
+            <div class="izinler-grid">
+              <div class="yetki-grubu tek-yetki">
+                <label class="izin ana-yetki"
+                  ><input type="checkbox" id="raporErisimi" /><span
+                    >Raporlara erişim</span
+                  ></label
+                >
+              </div>
+              <div class="yetki-grubu">
+                <label class="izin ana-yetki"
+                  ><input
+                    type="checkbox"
+                    id="kullaniciGorme"
+                    onchange="kullaniciYetkileriniGoster()"
+                  /><span>Kullanıcıları görüntüleme</span></label
+                >
+                <div id="kullaniciAltYetkileri" class="alt-yetkiler">
+                  <label class="izin"
+                    ><input type="checkbox" id="kullaniciEkleme" /><span
+                      >Kullanıcı ekleme</span
+                    ></label
+                  >
+                  <label class="izin"
+                    ><input type="checkbox" id="kullaniciDuzenleme" /><span
+                      >Kullanıcı düzenleme</span
+                    ></label
+                  >
+                  <label class="izin"
+                    ><input type="checkbox" id="kullaniciSilme" /><span
+                      >Kullanıcı silme</span
+                    ></label
+                  >
+                </div>
+              </div>
+              <div class="yetki-grubu">
+                <label class="izin ana-yetki"
+                  ><input
+                    type="checkbox"
+                    id="varlikGorme"
+                    onchange="varlikYetkileriniGoster()"
+                  /><span>Varlıkları görüntüleme</span></label
+                >
+                <div id="varlikAltYetkileri" class="alt-yetkiler">
+                  <label class="izin"
+                    ><input type="checkbox" id="varlikEkleme" /><span
+                      >Varlık ekleme</span
+                    ></label
+                  >
+                  <label class="izin"
+                    ><input type="checkbox" id="varlikDuzenleme" /><span
+                      >Varlık düzenleme</span
+                    ></label
+                  >
+                  <label class="izin"
+                    ><input type="checkbox" id="varlikSilme" /><span
+                      >Varlık silme</span
+                    ></label
+                  >
+                </div>
+              </div>
+              <div class="yetki-grubu">
+                <div class="yetki-grup-baslik">📦 Envanter</div>
+                <label class="izin ana-yetki"
+                  ><input
+                    type="checkbox"
+                    id="envanterGorme"
+                    onchange="envanterYetkileriniGoster()"
+                  /><span>Envanter Görüntüleme</span></label
+                >
+                <div id="envanterAltYetkileri" class="alt-yetkiler">
+                  <label class="izin"
+                    ><input type="checkbox" id="zimmetEkleme" /><span
+                      >Yeni Zimmet Ekle</span
+                    ></label
+                  >
+                  <label class="izin"
+                    ><input type="checkbox" id="zimmetIadeAl" /><span
+                      >Zimmet İade Al</span
+                    ></label
+                  >
+                </div>
+              </div>
+              <div class="yetki-grubu">
+                <div class="yetki-grup-baslik">🛠️ Talepler</div>
+                <label class="izin"
+                  ><input type="checkbox" id="talepGorme" /><span
+                    >Talep Görüntüleme</span
+                  ></label
+                >
+                <label class="izin"
+                  ><input type="checkbox" id="talepOlusturma" /><span
+                    >Talep Oluşturma</span
+                  ></label
+                >
+                <label class="izin"
+                  ><input type="checkbox" id="talepSonuclandirma" /><span
+                    >Talep Sonuçlandırma</span
+                  ></label
+                >
+              </div>
+            </div>
+          </div>
+
+          <div class="form-alt">
+            <button class="iptal-btn" onclick="kullaniciFormunuKapat()">
+              İptal
+            </button>
+            <button
+              class="iptal-btn sifre-sifirla-btn"
+              id="sifreSifirlaBtn"
+              onclick="kullaniciSifresiniSifirla()"
+              type="button"
+            >
+              Şifreyi Sıfırla
+            </button>
+            <button
+              class="kaydet-btn"
+              id="kullaniciKaydetBtn"
+              onclick="kullaniciEkle()"
+            >
+              Kullanıcı Oluştur
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div id="sifreDegistirmeFormu" class="form-overlay">
+        <div class="form-kutu sifre-degistirme-kutusu">
+          <div class="form-baslik">
+            <h2>Güvenlik Nedeniyle</h2>
+          </div>
+          <p class="form-aciklama">
+            Şifrenizi değiştirmeniz gerekmektedir. Yeni şifrenizi belirlemeden
+            sisteme giriş yapamazsınız.
+          </p>
+          <label>Mevcut Şifre</label>
+          <input type="password" id="mevcutSifre" />
+          <label>Yeni Şifre</label>
+          <input
+            type="password"
+            id="yeniSifre"
+            oninput="sifreGucuGuncelle('yeniSifre', 'yeniSifreGostergesi')"
+          />
+          <div id="yeniSifreGostergesi" class="sifre-gucu-gostergesi"></div>
+          <label>Yeni Şifre Tekrar</label>
+          <input type="password" id="yeniSifreTekrar" />
+          <div class="formButonlari">
+            <button type="button" onclick="zorunluSifreyiGuncelle()">
+              Güncelle
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div id="geciciSifreModal" class="form-overlay">
+        <div class="form-kutu gecici-sifre-kutusu">
+          <div class="form-baslik">
+            <h2>Geçici Şifre Oluşturuldu</h2>
+            <button type="button" onclick="geciciSifreModaliniKapat()">
+              ×
+            </button>
+          </div>
+          <p class="form-aciklama">
+            Bu şifreyi kullanıcıya güvenli şekilde iletin. Kullanıcı ilk girişte
+            yeni bir şifre belirlemelidir.
+          </p>
+          <div class="gecici-sifre-gosterim">
+            <strong id="geciciSifreDegeri"></strong>
+            <button type="button" onclick="geciciSifreyiKopyala()">
+              Kopyala
+            </button>
+          </div>
+          <p
+            id="geciciSifreKopyaMesaji"
+            class="gecici-sifre-mesaji"
+            aria-live="polite"
+          ></p>
+          <div class="formButonlari">
+            <button type="button" onclick="geciciSifreModaliniKapat()">
+              Kapat
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div id="talepFormu" class="form-overlay">
+        <div class="form-kutu talep-form-kutu">
+          <div class="form-baslik">
+            <h2 id="talepFormBaslik">Yeni Talep Oluştur</h2>
+            <button type="button" onclick="talepFormunuKapat()">×</button>
+          </div>
+
+          <div class="form-grid">
+            <div class="form-grup">
+              <label>Talep Türü</label>
+              <select
+                id="talepTuru"
+                onchange="talepKonuSecenekleriniGuncelle()"
+              >
+                <option value="">Talep türü seçiniz</option>
+                <option value="Donanım">Donanım</option>
+                <option value="Yazılım">Yazılım</option>
+                <option value="Ağ / İnternet">Ağ / İnternet</option>
+                <option value="Erişim / Yetkilendirme">
+                  Erişim / Yetkilendirme
+                </option>
+                <option value="Hesap / Şifre">Hesap / Şifre</option>
+                <option value="Kullanıcı / Personel">
+                  Kullanıcı / Personel
+                </option>
+                <option value="Diğer">Diğer</option>
+              </select>
+            </div>
+
+            <div class="form-grup" style="grid-column: 1 / -1">
+              <label>Konu</label>
+              <select id="talepKonu">
+                <option value="">Konu seçiniz</option>
+              </select>
+            </div>
+
+            <div class="form-grup">
+              <label>Talep Sahibi</label>
+              <select id="talepKullanici">
+                <option value="">Kullanıcı seçiniz</option>
+              </select>
+            </div>
+
+            <div class="form-grup">
+              <label>İlgili Varlık</label>
+              <select id="talepCihaz">
+                <option value="">Varlık seçiniz</option>
+              </select>
+            </div>
+
+            <div class="form-grup">
+              <label>Öncelik</label>
+              <select id="talepOncelik">
+                <option value="Düşük">Düşük</option>
+                <option value="Orta" selected>Orta</option>
+                <option value="Yüksek">Yüksek</option>
+                <option value="Kritik">Kritik</option>
+              </select>
+            </div>
+
+            <div class="form-grup" style="grid-column: 1 / -1">
+              <label>Açıklama</label>
+              <textarea
+                id="talepAciklama"
+                rows="4"
+                placeholder="Talebiniz hakkında açıklama yazınız..."
+              ></textarea>
+            </div>
+          </div>
+
+          <div class="formButonlari">
+            <button type="button" onclick="talepOlustur()">
+              Talebi Oluştur
+            </button>
+
+            <button class="iptal" type="button" onclick="talepFormunuKapat()">
+              İptal
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div id="zimmetFormu" class="form-overlay">
+        <div class="form-kutu zimmet-kutu">
+          <div class="form-baslik">
+            <h2>Yeni Zimmet</h2>
+            <button onclick="zimmetFormunuKapat()">×</button>
+          </div>
+
+          <p class="form-aciklama">Bir varlığı bir kullanıcıya zimmetleyin.</p>
+
+          <label>Varlık</label>
+          <select id="zimmetCihaz"></select>
+
+          <label>Kullanıcı</label>
+          <select
+            id="zimmetKullanici"
+            onchange="zimmetKullaniciSeciminiGuncelle()"
+          ></select>
+
+          <div id="manuelKullaniciAlani" class="manuel-kullanici-alani">
+            <label>Ad Soyad</label>
+            <input
+              id="manuelKullaniciAdi"
+              type="text"
+              placeholder="Ad Soyad giriniz"
+            />
+          </div>
+
+          <label>Zimmet Tarihi</label>
+          <input type="date" id="zimmetTarih" />
+
+          <label>Açıklama</label>
+          <textarea
+            id="zimmetAciklama"
+            placeholder="Zimmet açıklaması"
+          ></textarea>
+
+          <div class="formButonlari">
+            <button onclick="zimmetOlustur()">Zimmetle</button>
+            <button class="iptal" onclick="zimmetFormunuKapat()">İptal</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="profilFormu" class="form-overlay">
+        <div class="formKutusu">
+          <div class="form-baslik">
+            <h2>Yönetici Profili</h2>
+            <button onclick="profilKapat()">×</button>
+          </div>
+          <p class="profilBilgi">Yönetici kullanıcı ayarları.</p>
+          <label>Ad Soyad</label>
+          <input type="text" id="profilAdSoyad" />
+          <label>Kullanıcı Adı</label>
+          <input type="text" id="profilKullaniciAdi" />
+          <label>Yeni Şifre</label>
+          <input
+            type="password"
+            id="profilSifre"
+            placeholder="Değiştirmek istemiyorsanız boş bırakın"
+            oninput="sifreGucuGuncelle('profilSifre', 'profilSifreGostergesi')"
+          />
+          <div id="profilSifreGostergesi" class="sifre-gucu-gostergesi"></div>
+          <label>Yeni Şifre Tekrar</label>
+          <input type="password" id="profilSifreTekrar" />
+          <div class="formButonlari">
+            <button onclick="profilKaydet()">Kaydet</button>
+            <button class="iptal" onclick="profilKapat()">İptal</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Onay (Confirm) Modalı -->
+    <div
+      id="onayModali"
+      class="form-overlay"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="onayBaslik"
+    >
+      <div class="form-kutu onay-kutu">
+        <div id="onaySimge" class="onay-simge tema-bilgi">ℹ️</div>
+        <h2 id="onayBaslik" class="onay-baslik">Onay</h2>
+        <p id="onayMesaj" class="onay-mesaj"></p>
+        <div class="formButonlari onay-butonlari">
+          <button
+            type="button"
+            class="iptal"
+            id="onayIptalBtn"
+            onclick="onaySonucu(false)"
+          >
+            İptal
+          </button>
+          <button type="button" id="onayOnaylaBtn" onclick="onaySonucu(true)">
+            Onayla
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Cihaz Detay Modalı -->
+    <div id="cihazDetayModal" class="form-overlay" style="display: none">
+      <div class="form-kutu cihaz-detay-kutu">
+        <div class="form-baslik">
+          <h2 id="cihazDetayBaslik">Detay Gör</h2>
+          <button onclick="cihazDetayKapat()">×</button>
+        </div>
+        <!-- Düzenleme formu YOK, sadece okunabilir verilerin basılacağı alan -->
+        <div id="cihazDetayIcerik" class="cihaz-detay-icerik"></div>
+      </div>
+    </div>
+
+    <!-- Talep Detay Modalı -->
+    <div id="talepDetayModal" class="form-overlay" style="display: none">
+      <div class="form-kutu cihaz-detay-kutu">
+        <div class="form-baslik">
+          <h2 id="talepDetayBaslik">Talep Detayı</h2>
+          <button type="button" onclick="talepDetayKapat()">×</button>
+        </div>
+        <!-- Düzenleme formu YOK, sadece okunabilir verilerin basılacağı alan -->
+        <div id="talepDetayIcerik" class="cihaz-detay-icerik"></div>
+      </div>
+    </div>
+
+    <!-- Yazdırma Alanı -->
+    <div id="yazdirmaAlani" class="yazdirma-alani"></div>
+
+    <!-- Toast Bildirim Konteyneri -->
+    
+    <div id="toastKonteyner" class="toast-konteyner" aria-live="polite"></div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  </body>
+</html>
